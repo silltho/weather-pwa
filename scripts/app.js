@@ -12,6 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(function(reg) {
+      //-------------MessageChannel------------
+      var msgChan = new MessageChannel()
+      msgChan.port1.onmessage = function (event) {
+       console.log('Message received in page:' + event.data)
+      }
+
+      var btnLogin = document.getElementById('butLogin')
+
+      if(btnLogin) {
+        btnLogin.addEventListener('click', function() {
+            console.log('sendlogin')
+            var msg = { action: 'triple', value: 2 }
+            navigator.serviceWorker.controller.postMessage(msg, [msgChan.port2])
+        });
+      }
+      //-------------MessageChannel------------
+    })
+    .catch(function(err) {
+      console.log('Error registering Service Worker', err);
+    });
+}
+
+
 //-------------deferredPrompt------------
   var deferredPrompt;
 
