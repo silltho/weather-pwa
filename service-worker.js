@@ -49,8 +49,8 @@ self.addEventListener('message', function (event) {
  var data = event.data
  var openPort = event.ports[0]
 
- if (data.action === 'triple') {
-   openPort.postMessage(data.value * 3)
+ if (data.action === 'login') {
+   openPort.postMessage(true)
  }
 })
 
