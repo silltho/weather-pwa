@@ -35,32 +35,32 @@ let loggedIn = false
 
 //-------------deferredPrompt------------
 
-	var btnSave = document.getElementById('butSave')
+  var btnSave = document.getElementById('butSave')
 
   if(btnSave) {
-  	btnSave.addEventListener('click', function() {
-  	  if(deferredPrompt !== undefined) {
-  	    // The user has had a positive interaction with our app and Chrome
-  	    // has tried to prompt previously, so let's show the prompt.
-  	    deferredPrompt.prompt();
+    btnSave.addEventListener('click', function() {
+      if(deferredPrompt !== undefined) {
+        // The user has had a positive interaction with our app and Chrome
+        // has tried to prompt previously, so let's show the prompt.
+        deferredPrompt.prompt();
 
-  	    // Follow what the user has done with the prompt.
-  	    deferredPrompt.userChoice.then(function(choiceResult) {
+        // Follow what the user has done with the prompt.
+        deferredPrompt.userChoice.then(function(choiceResult) {
 
-  	      console.log(choiceResult.outcome);
+          console.log(choiceResult.outcome);
 
-  	      if(choiceResult.outcome == 'dismissed') {
-  	        console.log('User cancelled home screen install');
-  	      }
-  	      else {
-  	        console.log('User added to home screen');
-  	      }
+          if(choiceResult.outcome == 'dismissed') {
+            console.log('User cancelled home screen install');
+          }
+          else {
+            console.log('User added to home screen');
+          }
 
-  	      // We no longer need the prompt.  Clear it up.
-  	      deferredPrompt = null;
-  	    });
-  	  }
-  	});
+          // We no longer need the prompt.  Clear it up.
+          deferredPrompt = null;
+        });
+      }
+    });
   }
 //-------------deferredPrompt-------------
 
@@ -465,6 +465,7 @@ window.start = () => {
     function registerBroadcastReceiver() {
         navigator.serviceWorker.onmessage = function(event) {
             loggedIn = event.data
+            if(!event.data) alert('user logged out')
             window.start()
         };
     }
