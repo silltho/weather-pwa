@@ -45,14 +45,28 @@ self.addEventListener('install', function(e) {
   );
 });
 
-self.addEventListener('message', function (event) {
- var data = event.data
- var openPort = event.ports[0]
-
- if (data.action === 'login') {
-   openPort.postMessage(true)
- }
-})
+self.addEventListener('message', function(event) {
+    var data = event.data;
+console.log('message', event.data)
+    if (data.action === "login") {
+        console.log('login success')
+        self.clients.matchAll().then(function(clients) {
+            console.log('clients', clients)
+            clients.forEach(function(client) {
+                client.postMessage(true);
+            })
+        })
+    }
+    else if (data.action === "logout") {
+        console.log('logout success')
+        self.clients.matchAll().then(function(clients) {
+            console.log('clients', clients)
+            clients.forEach(function(client) {
+                client.postMessage(false);
+            })
+        })
+    }
+});
 
 self.addEventListener('activate', function(e) {
   console.log('[ServiceWorker] Activate');

@@ -14,32 +14,6 @@
 
 let loggedIn = false
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(function(reg) {
-      //-------------MessageChannel------------
-      var msgChan = new MessageChannel()
-      msgChan.port1.onmessage = function (event) {
-        console.log('loggedIn')
-        loggedIn = event.data
-        window.startTTTT()
-      }
-
-      var btnLogin = document.getElementById('butLogin')
-      if(btnLogin) {
-        btnLogin.addEventListener('click', function() {
-            console.log('sendlogin')
-            var msg = { action: 'login' }
-            navigator.serviceWorker.controller.postMessage(msg, [msgChan.port2])
-        });
-      }
-      //-------------MessageChannel------------
-    })
-    .catch(function(err) {
-      console.log('Error registering Service Worker', err);
-    });
-}
-
 
 //-------------deferredPrompt------------
   var deferredPrompt;
@@ -419,7 +393,8 @@ if ('serviceWorker' in navigator) {
   // TODO add startup code here
   app.selectedCities = localStorage.selectedCities;
 
-window.startTTTT = () => {
+window.start = () => {
+  console.log('loggedIn', loggedIn)
   if(loggedIn) {
     if (app.selectedCities) {
       app.selectedCities = JSON.parse(app.selectedCities);
@@ -441,12 +416,56 @@ window.startTTTT = () => {
   }
 }
 
-
+  var btnLogin = document.getElementById('butLogin')
+  if(btnLogin) btnLogin.addEventListener('click', loginCommunication)
+  var btnLogout = document.getElementById('butLogout')
+  if(btnLogout) btnLogout.addEventListener('click', logoutCommunication)
 
   // TODO add service worker code here
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-             .register('./service-worker.js')
-             .then(function() { console.log('Service Worker Registered'); });
-  }
+    if (navigator.serviceWorker) {
+        console.log("ServiceWorkers are supported");
+        navigator.serviceWorker.register('service-worker.js', {
+            scope: './'
+        })
+            .then(function(reg) {
+                console.log("ServiceWorker registered", reg);
+                registerBroadcastReceiver()
+            })
+            .catch(function(error) {
+                console.log("Failed to register ServiceWorker", error);
+            });
+    }
+
+    function loginCommunication() {
+        if (navigator.serviceWorker.controller) {
+            var messageChannel = new MessageChannel();
+
+            console.log("Sending message to the service worker");
+            navigator.serviceWorker.controller.postMessage({
+                action: 'login'
+            }, [messageChannel.port2]);
+        } else {
+            console.log("No active ServiceWorker");
+        }
+    }
+
+    function logoutCommunication() {
+        if (navigator.serviceWorker.controller) {
+            var messageChannel = new MessageChannel();
+
+            console.log("Sending message to the service worker");
+            navigator.serviceWorker.controller.postMessage({
+                action: 'logout'
+            }, [messageChannel.port2]);
+        } else {
+            console.log("No active ServiceWorker");
+        }
+    }
+
+    function registerBroadcastReceiver() {
+        navigator.serviceWorker.onmessage = function(event) {
+            loggedIn = event.data
+            window.start()
+        };
+    }
 })();
